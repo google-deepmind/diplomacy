@@ -17,6 +17,7 @@
 
 import abc
 import collections
+import functools
 from typing import Any, Dict, Sequence, Tuple
 
 from absl.testing import absltest
@@ -192,9 +193,10 @@ class ObservationTest(absltest.TestCase, metaclass=abc.ABCMeta):
                        self.get_reference_legal_actions(),
                        trajectory.legal_actions)
 
-    tree.map_structure(np.testing.assert_array_almost_equal,
-                       self.get_reference_step_outputs(),
-                       trajectory.step_outputs)
+    tree.map_structure(
+        functools.partial(np.testing.assert_array_almost_equal, decimal=5),
+        self.get_reference_step_outputs(),
+        trajectory.step_outputs)
 
   def test_fixed_play(self):
     """Tests the user's implementation of a Diplomacy adjudicator.
