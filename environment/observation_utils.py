@@ -101,6 +101,27 @@ Observation = collections.namedtuple(
     'Observation', ['season', 'board', 'build_numbers', 'last_actions'])
 
 
+class ProvinceType(enum.Enum):
+  LAND = 0
+  SEA = 1
+  COASTAL = 2
+  BICOASTAL = 3
+
+
+def province_type_from_id(province_id: ProvinceID) -> ProvinceType:
+  """Returns the ProvinceType for the province."""
+  if province_id < 14:
+    return ProvinceType.LAND
+  elif province_id < 33:
+    return ProvinceType.SEA
+  elif province_id < 72:
+    return ProvinceType.COASTAL
+  elif province_id < 75:
+    return ProvinceType.BICOASTAL
+  else:
+    raise ValueError('Invalid ProvinceID (too large)')
+
+
 def province_id_and_area_index(area: AreaID) -> Tuple[ProvinceID, AreaIndex]:
   """Returns the province_id and the area index within the province.
 
@@ -144,6 +165,14 @@ def area_from_province_id_and_area_index(province_id: ProvinceID,
     KeyError: If the province_id and area_index are invalid
   """
   return _prov_and_area_id_to_area[(province_id, area_index)]
+
+
+def area_index_for_fleet(
+    province_tuple: ProvinceWithFlag) -> AreaIndex:
+  if province_type_from_id(province_tuple[0]) == ProvinceType.BICOASTAL:
+    return province_tuple[1] + 1
+  else:
+    return 0
 
 
 def obs_index_start_and_num_areas(

@@ -61,6 +61,28 @@ to Paris. The list of actions in `environment/action_list.py` contains all
 actions that could ever be legal in a game of Diplomacy. This list allows the
 full 64 bit action to be recovered from the action’s index.
 
+The file `environment/mila_actions.py` contains functions to convert between the
+action format used by this codebase (hereafter DM actions) and the action format
+used by Pacquette et al. (MILA actions)
+
+These mappings are not one-to-one for a few reasons: - MILA actions do not
+distinguish between disbanding a unit in a retreats phase and disbanding during
+the builds phase, DM actions do. - MILA actions specify the unit type
+(fleet/army) and coast it occupies when referring to units on the board. DM
+actions specify these details only for build actions. In all other circumstances
+the province uniquely specifies the unit given the context of the board state. -
+Pacquette et al. disallowed long convoys, and some convoy orders that are always
+irrelevant to the adjudicaiton.
+
+For converting from MILA actions to DM actions, the function
+`mila_action_to_action` gives a one-to-one conversion by taking the current
+season (an `environment/observation_utils.Season`) as additional context.
+
+When converting from DM actions to MILA actions, the function
+`action_to_mila_actions` returns a list of up to 6 possible MILA actions. Given
+a state, at most one of these actions can be legal, which one can be inferred by
+checking the game state.
+
 ### Observations
 
 The observation format is defined in `observation_utils.Observation`. It is a

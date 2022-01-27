@@ -125,6 +125,27 @@ def topological_index(
   return [tag_to_id[province] for province in topological_order]
 
 
+def fleet_adjacency_map() -> Dict[utils.AreaID, Sequence[utils.AreaID]]:
+  """Builds a mapping for valid fleet movements between areas."""
+  mdf_content = get_mdf_content(MapMDF.BICOASTAL_MAP)
+  tag_to_area_id = _tag_to_id(mdf_content)
+  lines = mdf_content.splitlines()
+
+  fleet_adjacency = {}
+  for edge_string in lines[4:-1]:
+    provinces = [w for w in edge_string.split(' ') if w not in ('(', ')', '')]
+    start_province = tag_to_area_id[provinces[0]]
+    fleet_adjacency[start_province] = []
+    flt_tag_found = False
+    for province in provinces[1:]:
+      if flt_tag_found:
+        fleet_adjacency[start_province].append(tag_to_area_id[province])
+      elif province == 'FLT':
+        flt_tag_found = True
+
+  return fleet_adjacency
+
+
 _STANDARD_MAP_MDF_CONTENT = """MDF
 ( AUS ENG FRA GER ITA RUS TUR )
 ( ( ( AUS VIE BUD TRI ) ( ENG LON EDI LVP ) ( FRA PAR MAR BRE ) ( GER BER MUN KIE ) ( ITA ROM VEN NAP ) ( RUS MOS SEV WAR STP ) ( TUR ANK CON SMY ) ( UNO SER BEL DEN GRE HOL NWY POR RUM SWE TUN BUL SPA ) )
