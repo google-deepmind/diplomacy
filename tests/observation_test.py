@@ -48,6 +48,13 @@ def construct_observations(obs: collections.OrderedDict) -> utils.Observation:
   return utils.Observation(**obs)
 
 
+def sort_last_moves(
+    obs: Sequence[utils.Observation]) -> Sequence[utils.Observation]:
+  """Sort the last moves observation to make test permutation invariant."""
+  return [utils.Observation(o.season, o.board, o.build_numbers,
+                            sorted(o.last_actions)) for o in obs]
+
+
 class FixedPlayPolicy(network_policy.Policy):
 
   def __init__(
@@ -186,8 +193,9 @@ class ObservationTest(absltest.TestCase, metaclass=abc.ABCMeta):
                                       max_length=10)
     tree.map_structure(
         np.testing.assert_array_equal,
-        [construct_observations(o) for o in self.get_reference_observations()],
-        trajectory.observations)
+        sort_last_moves([construct_observations(o)
+                         for o in self.get_reference_observations()]),
+        sort_last_moves(trajectory.observations))
 
     tree.map_structure(np.testing.assert_array_equal,
                        self.get_reference_legal_actions(),
@@ -212,8 +220,9 @@ class ObservationTest(absltest.TestCase, metaclass=abc.ABCMeta):
                                       max_length=10)
     tree.map_structure(
         np.testing.assert_array_equal,
-        [construct_observations(o) for o in self.get_reference_observations()],
-        trajectory.observations)
+        sort_last_moves([construct_observations(o)
+                         for o in self.get_reference_observations()]),
+        sort_last_moves(trajectory.observations))
 
     tree.map_structure(np.testing.assert_array_equal,
                        self.get_reference_legal_actions(),

@@ -91,8 +91,9 @@ named tuple of:
 season: One of `observation_utils.Season`
 
 board: An array of shape (`observation_utils.NUM_AREAS`,
-`utils.PROVINCE_VECTOR_LENGTH`). The areas are ordered as in
-`bicoastal_map.mdf`. The vector representing a single area is, in order:
+`utils.PROVINCE_VECTOR_LENGTH`). The areas are ordered by their AreaID as given
+by `province_order.province_name_to_id(province_order.MapMDF.BICOASTAL_MAP)`.
+The vector representing a single area is, in order:
 - 3 flags representing the presence of an army, a fleet or an empty province
 respectively
 - 7 flags representing the owner of the unit, plus an 8th that is true if there
@@ -103,6 +104,9 @@ is no such unit
 dislodged unit
 - 7 flags representing the owner of the dislodged unit, plus an 8th that is true
 if there is no such unit
+- 3 flags representing whether the area is a land, sea or coast area of a
+bicoastal province. These are mutually exclusive: a land area is any area an
+army can occupy, which includes e.g. StP but does not include StP/NC or StP/SC.
 - 7 flags representing the owner of the supply centre in the province, plus an
 8th representing an unowned supply centre. The 8th flag is false if there is no
 SC in the area
