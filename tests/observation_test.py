@@ -228,3 +228,6 @@ class ObservationTest(absltest.TestCase, metaclass=abc.ABCMeta):
     tree.map_structure(np.testing.assert_array_equal,
                        self.get_reference_legal_actions(),
                        trajectory.legal_actions)
+
+if __name__ == '__main__':
+  absltest.main()
