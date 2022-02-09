@@ -23,6 +23,7 @@ from typing import Any, Dict, Sequence, Tuple
 from absl.testing import absltest
 import numpy as np
 import tree
+import dill
 
 from diplomacy.environment import diplomacy_state
 from diplomacy.environment import game_runner
