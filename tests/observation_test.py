@@ -81,7 +81,9 @@ class FixedPlayPolicy(network_policy.Policy):
     return action_output
 
 
-class ObservationTest(absltest.TestCase, metaclass=abc.ABCMeta):
+class ObservationTest(absltest.TestCase):
+
+  __metaclass__ = abc.ABCMeta
 
   @abc.abstractmethod
   def get_diplomacy_state(self) -> diplomacy_state.DiplomacyState:
