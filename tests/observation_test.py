@@ -183,7 +183,8 @@ class ObservationTest(absltest.TestCase, metaclass=abc.ABCMeta):
     network_policy_instance = network_policy.Policy(
         network_handler=network_handler,
         num_players=7,
-        temperature=0.2)
+        temperature=0.2,
+        calculate_all_policies=True)
     fixed_policy_instance = FixedPlayPolicy(self.get_actions_outputs())
 
     trajectory = game_runner.run_game(state=self.get_diplomacy_state(),

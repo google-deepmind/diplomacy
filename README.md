@@ -111,8 +111,16 @@ army can occupy, which includes e.g. StP but does not include StP/NC or StP/SC.
 8th representing an unowned supply centre. The 8th flag is false if there is no
 SC in the area
 
-build_numbers: A vector of length 7 saying how many units a player may build
-(positive values) or must remove (negative values)
+build_numbers: In build phases, this is a vector of length 7 saying how many
+units a player may build (positive values) or must remove (negative values).
+This number is the number of units they can actually build. So, for example, if
+a player has 2 fewer units than owned supply centres, but only 1 unoccupied home
+supply centre, then they can only build 1 unit, and the build number is 1.
+
+In non-build phases, the removal counts (negative values) from the previous
+build phase are retained, however the build counts (positive values) are zeroed
+out. (This was a bug in the observations, which should be reproduced because the
+agents were trained using such observations).
 
 last_actions: A list of the actions submitted in the last phase of the game.
 They are in the same order as given in the previous step method, but flattened
@@ -132,7 +140,7 @@ You can also do these steps manually using the following commants:
 
 ### Setup
 
-To set up a ptyhon3 virtual environment with the required dependencies, use the
+To set up a python3 virtual environment with the required dependencies, use the
 following commands, or simply run `run.sh`.
 
 ```shell
@@ -164,11 +172,47 @@ We provide two test files:
 *   `tests/observation_test.py` tests that the network plays Diplomacy as
     expected given the paremeters we provide, and it checks that the user's
     Diplomacy environment and adjudicator produce the same observations and
-    trajectories as our internal implementation. Specifically, this file
-    contains a template test class which the user must complete with simple
-    methods to load the parameters and trajectory files we provide alongside
-    this codebase. Suggestions for how to implement those are provided in the
-    file itself.
+    trajectories as our internal implementation. See below for the steps to run
+    this test.
+
+### Running observation_test.py
+
+`tests/observation_test.py` contains a template test class. To run this test,
+write a new test class that inherits from `ObservationTest`. The steps to do
+this are:
+
+1.  Create a new test class that inherits from `ObservationTest` (usually in a
+    new file) and add a call to absl.main() in that file.
+2.  Implement the abstract methods of `ObservationTest`. These are
+    `get_parameter_provider`, `get_reference_observations`,
+    `get_reference_legal_actions`, `get_reference_step_outputs`, and
+    `get_actions_outputs`. These methods are to load the network parameters and
+    test data files linked below, suggested implementations are included in the
+    comments on `ObservationTest`
+3.  Add an implementation of the `environment.diplomacy_state.DiplomacyState`
+    abstract class. The implementation will usually be a wrapper around the
+    user's own diplomacy adjudicator, which will convert to match the agent's
+    expected action and observation formats. The sections of this README on
+    Observations and Action Space document the required behaviour of the
+    diplomacy state, and describe several utilities intended to help with the
+    implementation.
+4.  Implement the abstract method `ObservationTest.get_diplomacy_state` with a
+    call to your implementation of a DiplomacyState
+
+If the implementation of the DiplomacyState is incorrect, both test methods
+`test_fixed_play` and `test_network_play` will fail. If the DiplomacyState
+implementation is correct, but the network is not behaving correctly, then only
+`test_network_play` will fail, but `test_fixed_play` will pass.
+
+### Running the trained agents
+
+Once both `ObservationTest` test methods pass, code similar to the first lines
+of the method `test_network_play` can be written to load the trained networks as
+a `network.network_policy.Policy`. The `Policy` has an `actions` method that
+produces actions. In order to behave correctly, the actions method must be
+called every turn of the game, in order, starting from Spring 1901. If phases
+are missed, the agent will not be able to construct the network input correctly,
+as it depends on the observations from several consecutive phases.
 
 ## Download parameters and test trajectories.
 

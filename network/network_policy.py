@@ -28,13 +28,26 @@ class Policy:
       self,
       network_handler,
       num_players,
-      temperature):
+      temperature,
+      calculate_all_policies=False):
+    """Ctor.
+
+    Args:
+      network_handler: network.network.NetworkHandler
+      num_players: Number of players in game (i.e. 7)
+      temperature: Policy sampling temperature (0.1 was used for evaluation in
+        paper)
+      calculate_all_policies: Whether to calculate policy for all players
+        regardless of the slots_list argument to actions method. Does not affect
+        the sampled policy, but adds more data to the step_outputs
+    """
 
     self._network_handler = network_handler
     self._num_players = num_players
     self._obs_transform_state = None
     self._temperature = temperature
     self._str = f'OnPolicy(t={self._temperature})'
+    self._calculate_all_policies = calculate_all_policies
 
   def __str__(self):
     return self._str
@@ -59,11 +72,13 @@ class Policy:
         actions for the corresponding entry of slots_list.
       - Arbitrary step_outputs containing facts about the step
     """
+    slots_to_calculate = (list(range(self._num_players)) if
+                          self._calculate_all_policies else slots_list)
     (transformed_obs,
      self._obs_transform_state) = self._network_handler.observation_transform(
          observation=observation,
          legal_actions=legal_actions,
-         slots_list=slots_list,
+         slots_list=slots_to_calculate,
          prev_state=self._obs_transform_state,
          temperature=self._temperature)
 
